@@ -4,10 +4,10 @@ Artificial intelligence that uses minimax and alpha-beta pruning strategies in g
 
 ## Constraint Satisfaction Problem
 
-Solves a [https://en.wikipedia.org/wiki/Pentomino](pentomino) game, and accomplishes the same with dominos and trionomos.
-Relevant files are solve.py, Pentomino.py, and instances.py.
+Solves a [pentomino](https://en.wikipedia.org/wiki/Pentomino) game, and accomplishes the same with dominos and trionomos.
+Relevant files are [solve.py](solve.py), [Pentomino.py](Pentomino.py), and [instances.py](instances.py).
 
 ## Ultimate Tic-Tac-Toe
 
 Uses artificial intelligence techniques to play a game of ultimate tic-tac-toe. 
-Relevant file is uttt.py.
+Relevant file is [uttt.py](uttt.py).
