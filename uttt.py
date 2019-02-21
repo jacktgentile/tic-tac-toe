@@ -250,8 +250,10 @@ class ultimateTicTacToe:
                         on the board.
         """
         #YOUR CODE HERE
-        movesLeft=True
-        return movesLeft
+        for row in self.board:
+            if '-' in row:
+                return True
+        return False
 
     def checkLocalBoard(self, startIdx):
         x = startIdx[0]
