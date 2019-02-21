@@ -87,8 +87,37 @@ class ultimateTicTacToe:
         movesLeft=True
         return movesLeft
 
+    def checkLocalBoard(self, startIdx):
+        x = startIdx[0]
+        y = startIdx[1]
+        if board[0 + x][0 + y] == board[1 + x][1 + y] == board[2 + x][2 + y] != '-': # diag win
+            if board[0 + x][0 + y] == self.maxPlayer:
+                return 1
+            else:
+                return -1
+        if board[0 + x][2 + y] == board[1 + x][1 + y] == board[2 + x][0 + y] != '-': # other diag win
+            if board[0 + x][2 + y] == self.maxPlayer:
+                return 1
+            else:
+                return -1
+        # check rows going down
+        for i in range(3):
+            if board[0 + i + x][0 + y] == board[0 + i + x][1 + y] == board[0 + i + x][2 + y] != '-':
+                if board[0 + i + x][0 + y] == self.maxPlayer:
+                    return 1
+                else:
+                    return -1
+        # check columns going left to right
+        for i in range(3):
+            if board[0 + x][0 + i + y] == board[0 + x][1 + i + y] == board[0 + x][2 + i + y] != '-':
+                if board[0 + x][0 + i + y] == self.maxPlayer:
+                    return 1
+                else:
+                    return -1
+        return 0 # no winner yet in local board
+
     def checkWinner(self):
-        #Return termimnal node status for maximizer player 1-win,0-tie,-1-lose
+        #Return terminal node status for maximizer player 1-win,0-tie,-1-lose
         """
         This function checks whether there is a winner on the board.
         output:
@@ -97,8 +126,11 @@ class ultimateTicTacToe:
                      Return -1 if miniPlayer is the winner.
         """
         #YOUR CODE HERE
-        winner=0
-        return 0
+        for curr_start in self.globalIdx:
+            res = checkLocalBoard(self, curr_start) # 1, -1, or 0
+            if res != 0: # found a winner!
+                return res
+        return 0 # no winner yet
 
     def alphabeta(self,depth,currBoardIdx,alpha,beta,isMax):
         """
@@ -123,8 +155,6 @@ class ultimateTicTacToe:
         input args:
         depth(int): current depth level
         currBoardIdx(int): current local board index
-        alpha(float): alpha value
-        beta(float): beta value
         isMax(bool):boolean variable indicates whether it's maxPlayer or minPlayer.
                      True for maxPlayer, False for minPlayer
         output:
@@ -142,7 +172,7 @@ class ultimateTicTacToe:
                         True for maxPlayer plays first, and False for minPlayer plays first.
         isMinimaxOffensive(bool):boolean variable indicates whether it's using minimax or alpha-beta pruning algorithm for offensive agent.
                         True is minimax and False is alpha-beta.
-        isMinimaxOffensive(bool):boolean variable indicates whether it's using minimax or alpha-beta pruning algorithm for defensive agent.
+        isMinimaxDefensive(bool):boolean variable indicates whether it's using minimax or alpha-beta pruning algorithm for defensive agent.
                         True is minimax and False is alpha-beta.
         output:
         bestMove(list of tuple): list of bestMove coordinates at each step
