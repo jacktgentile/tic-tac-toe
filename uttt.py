@@ -132,6 +132,61 @@ class ultimateTicTacToe:
                 return res
         return 0 # no winner yet
 
+    def emptyCells(self, startIdx):
+        # returns empty cell coordinates relative to whole board, given local starting pt
+        '''
+        for example if board is
+        O _ X   O O X   O X _
+        _ X _   _ X _   _ _ _
+        X _ _   _ X O   _ _ _
+
+        _ _ _   X _ O   _ _ _
+        _ _ _   _ _ _   _ _ _
+        _ _ _   _ _ _   _ _ _
+
+        _ _ _   _ _ _   _ _ _
+        _ _ _   _ _ _   _ _ _
+        _ _ _   _ _ _   _ _ _
+        and emptyCells(self, startIdx = (0, 4)) is called, we look at top center local board
+        should return [(1,4), (2,4), (1, 6)]
+        '''
+        empties = []
+        x = startIdx[0]
+        y = startIdx[1]
+        for i in range(3):
+            for j in range(3):
+                if self.board[i + x][j + y] == '-':
+                    empties.append((i + x, j + y))
+        return empties
+
+    def newCurrBoardIdx(cell, startIdx):
+        # cell should be relative to whole board, not local
+        x = cell[0] - startIdx[0]
+        y = cell[1] - startIdx[1]
+        if x == 0:
+            if y == 0:
+                return 0
+            if y == 1:
+                return 1
+            if y == 2:
+                return 2
+        if x == 1:
+            if y == 0:
+                return 3
+            if y == 1:
+                return 4
+            if y == 2:
+                return 5
+        if x == 2:
+            if y == 0:
+                return 6
+            if y == 1:
+                return 7
+            if y == 2:
+                return 8
+        raise ValueError("values in cell/startIdx in correct!") # for debugging, remove for submission
+        return -1 # something went wrong!
+
     def alphabeta(self,depth,currBoardIdx,alpha,beta,isMax):
         """
         This function implements alpha-beta algorithm for ultimate tic-tac-toe game.
@@ -162,7 +217,38 @@ class ultimateTicTacToe:
         """
         #YOUR CODE HERE
         bestValue=0.0
-        return bestValue
+
+        if isMax:
+            bestValue = -inf
+            if depth == 3 or checkWinner(self) != 0: # base case
+                return evaluatePredifined(self, isMax)
+
+            empties = emptyCells(self, self.globalIdx[currBoardIdx])
+            for cell in empties:
+                x, y = cell[0], cell[1]
+                self.board[x][y] = self.maxPlayer
+                newCBI = newCurrBoardIdx(cell, self.globalIdx[currBoardIdx])
+                score = minimax(self, depth + 1, newCBI, !isMax)
+                self.board[x][y] = '-' # revert back
+                if score > bestValue:
+                    bestValue = score
+            return bestValue
+        else:
+            bestValue = inf
+            if depth == 3 or checkWinner(self) != 0: # base case
+                return evaluatePredifined(self, isMax)
+
+            empties = emptyCells(self, self.globalIdx[currBoardIdx])
+            for cell in empties:
+                x, y = cell[0], cell[1]
+                self.board[x][y] = self.minPlayer
+                newCBI = newCurrBoardIdx(cell, self.globalIdx[currBoardIdx])
+                score = minimax(self, depth + 1, newCBI, !isMax)
+                self.board[x][y] = '-' # revert back
+                if score < bestValue:
+                    bestValue = score
+            return bestValue
+
 
     def playGamePredifinedAgent(self,maxFirst,isMinimaxOffensive,isMinimaxDefensive):
         """
