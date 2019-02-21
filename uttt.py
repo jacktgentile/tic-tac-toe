@@ -192,7 +192,7 @@ class ultimateTicTacToe:
         score(float): estimated utility score for maxPlayer or minPlayer
         """
         #YOUR CODE HERE
-
+        score = 0.0
         if isMax:
             # rule1
             if checkWinner(self) == 1: # max wins!
@@ -385,6 +385,7 @@ class ultimateTicTacToe:
         """
         #YOUR CODE HERE
         bestValue=0.0
+        self.expandedNodes += 1
 
         if isMax:
             bestValue = -inf
@@ -440,7 +441,48 @@ class ultimateTicTacToe:
         bestValue=[]
         gameBoards=[]
         winner=0
-        return gameBoards, bestMove, expandedNodes, bestValue, winner
+
+        currBoardIdx = self.startBoardIdx
+        if isMinimaxOffensive and isMinimaxDefensive:
+            isMax = maxFirst
+            while True:
+                empties = self.emptyCells(self, currBoardIdx)
+                best = 0
+                if isMax:
+                    best = -inf
+                else:
+                    best = inf
+                bestCell = (-1, -1)
+                for cell in empties: # tuples
+                    if isMax:
+                        self.board[cell[0]][cell[1]] = self.maxPlayer
+                    else:
+                        self.board[cell[0]][cell[1]] = self.minPlayer
+                    newCBI = newCurrBoardIdx(cell, self.globalIdx[currBoardIdx])
+                    score = minimax(self, 1, newCBI, !isMax)
+                    self.board[cell[0]][cell[1]] = '-'
+                    if (isMax and score > best):
+                        best = score
+                        bestCell = cell
+                    elif (!isMax and score < best):
+                        best = score
+                        bestCell = cell
+                bestValue.append(best)
+                bestMove.append(bestCell)
+                if isMax:
+                    self.board[cell[0]][cell[1]] = self.maxPlayer
+                else:
+                    self.board[cell[0]][cell[1]] = self.minPlayer
+                gameBoards.append(copy.deepcopy(self.board))
+                isMax = !isMax
+                # break if found winner
+                res = checkWinner(self)
+                if res != 0:
+                    winner = res
+                    break
+
+
+        return gameBoards, bestMove, self.expandedNodes, bestValue, winner
 
     def playGameYourAgent(self):
         """
