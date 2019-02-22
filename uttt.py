@@ -196,6 +196,7 @@ class ultimateTicTacToe:
         if isMax:
             # rule1
             if self.checkWinner() == 1: # max wins!
+                print("util", 10000)
                 return 10000
             # rule2
             res = self.countUnblockedTwo(isMax) 
@@ -205,13 +206,16 @@ class ultimateTicTacToe:
             if res > 0:
                 score += res * 100
             if score > 0:
+                # print("util = ", score)
                 return score
             # rule3
             res = self.countCorners(isMax)
+            # print("util = ", res * 30)
             return res * 30
         else:
             # rule1
             if self.checkWinner() == -1: # min wins!
+                print("util = ", -10000)
                 return -10000
 
             # rule2
@@ -222,10 +226,12 @@ class ultimateTicTacToe:
             if res > 0:
                 score -= res * 100
             if score > 0:
+                # print("util = ", score)
                 return score
 
             # rule3
             res = self.countCorners(isMax)
+            # print("util = ", res * -30)
             return res * -30
 
 
@@ -391,6 +397,9 @@ class ultimateTicTacToe:
         if isMax:
             bestValue = -inf
             if depth == 3 or self.checkWinner() != 0: # base case
+                # if self.checkWinner() != 0:
+                #     print("at depth", depth, "found winner")
+                #     self.printGameBoard()
                 return self.evaluatePredifined(isMax)
 
             empties = self.emptyCells(self.globalIdx[currBoardIdx])
@@ -442,6 +451,8 @@ class ultimateTicTacToe:
         bestValue=[]
         gameBoards=[]
         winner=0
+
+        #TODO: make this work, as of now score is not positive when isMax
 
         currBoardIdx = self.startBoardIdx
         if isMinimaxOffensive and isMinimaxDefensive:
