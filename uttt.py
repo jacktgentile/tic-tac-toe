@@ -196,7 +196,7 @@ class ultimateTicTacToe:
         if isMax:
             # rule1
             if self.checkWinner() == 1: # max wins!
-                print("util", 10000)
+                # print("util", 10000)
                 return 10000
             # rule2
             res = self.countUnblockedTwo(isMax) 
@@ -215,7 +215,7 @@ class ultimateTicTacToe:
         else:
             # rule1
             if self.checkWinner() == -1: # min wins!
-                print("util = ", -10000)
+                # print("util = ", -10000)
                 return -10000
 
             # rule2
