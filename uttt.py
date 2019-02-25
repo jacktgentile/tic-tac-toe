@@ -247,8 +247,49 @@ class ultimateTicTacToe:
         score(float): estimated utility score for maxPlayer or minPlayer
         """
         #YOUR CODE HERE
-        score=0
-        return score
+        score = 0.0
+        if isMax:
+            # rule1
+            if self.checkWinner() == 1: # max wins!
+                # print("util", 10000)
+                return 10000
+            # rule2
+            res = self.countUnblockedTwo(isMax) 
+            if res > 0:
+                score += res * 500
+            res = self.countBlockedOpponent(isMax)
+            if res > 0:
+                score += res * 100
+            if score > 0:
+                # print("util = ", score)
+                return score
+            # rule3
+            res = self.countCorners(isMax)
+            # print("util = ", res * 30)
+            return res * 30
+            # return 0
+        else:
+            # rule1
+            if self.checkWinner() == -1: # min wins!
+                # print("util = ", -10000)
+                return -10000
+
+            # rule2
+            res = self.countUnblockedTwo(isMax) 
+            if res > 0:
+                score -= res * 500
+            res = self.countBlockedOpponent(isMax)
+            if res > 0:
+                score -= res * 100
+            if score > 0:
+                # print("util = ", score)
+                return score
+
+            # rule3
+            res = self.countCorners(isMax)
+            # print("util = ", res * -30)
+            return res * -30
+            # return 0
 
     def checkMovesLeft(self):
         """
@@ -366,6 +407,41 @@ class ultimateTicTacToe:
         raise ValueError("values in cell/startIdx in correct!") # for debugging, remove for submission
         return -1 # something went wrong!
 
+    def alphabetaYourAgent(self,depth,currBoardIdx,alpha,beta,isMax):
+        score=0.0
+
+        if isMax:
+            if depth >= 3 or self.checkWinner() != 0:
+                return self.evaluateDesigned(isMax)
+            score = -inf
+            empties = self.emptyCells(self.globalIdx[currBoardIdx])
+            for cell in empties:
+                x, y = cell[0], cell[1]
+                self.board[x][y] = self.maxPlayer
+                newCBI = self.newCurrBoardIdx(cell, self.globalIdx[currBoardIdx])
+                score = max(score, self.alphabetaYourAgent(depth + 1, newCBI, alpha, beta, not isMax))
+                self.board[x][y] = '_'
+                if score >= beta: # stop searching
+                    return score
+                alpha = max(alpha, score)
+            return score
+        else:
+            if depth >= 3 or self.checkWinner() != 0:
+                return self.evaluateDesigned(isMax)
+            score = inf
+            empties = self.emptyCells(self.globalIdx[currBoardIdx])
+            for cell in empties:
+                x, y = cell[0], cell[1]
+                self.board[x][y] = self.maxPlayer
+                newCBI = self.newCurrBoardIdx(cell, self.globalIdx[currBoardIdx])
+                score = min(score, self.alphabetaYourAgent(depth + 1, newCBI, alpha, beta, not isMax))
+                self.board[x][y] = '_'
+                if score <= alpha:
+                    return score
+                beta = min(beta, score)
+            return score
+        return score
+
     def alphabeta(self,depth,currBoardIdx,alpha,beta,isMax):
         """
         This function implements alpha-beta algorithm for ultimate tic-tac-toe game.
@@ -414,7 +490,6 @@ class ultimateTicTacToe:
                     return score
                 beta = min(beta, score)
             return score
-
         return score
 
     def minimax(self, depth, currBoardIdx, isMax):
@@ -506,6 +581,9 @@ class ultimateTicTacToe:
             isMax = maxFirst
             while True:
                 empties = self.emptyCells(self.globalIdx[currBoardIdx])
+                if len(empties) == 0:
+                    winner = 0
+                    break
                 best = 0
                 if isMax:
                     best = -inf
@@ -630,9 +708,76 @@ class ultimateTicTacToe:
         winner(int): 1 for maxPlayer is the winner, -1 for minPlayer is the winner, and 0 for tie.
         """
         #YOUR CODE HERE
+
+
+        # assuming predefined offensive = is maxPlayer ('X')
         bestMove=[]
         gameBoards=[]
         winner=0
+
+        currBoardIdx = self.startBoardIdx
+        agentTurn = True
+        while True:
+            if agentTurn:
+                empties = self.emptyCells(self.globalIdx[currBoardIdx])
+                if len(empties) == 0:
+                    winner = 0
+                    break
+                bestVal = -inf
+                bestOp = (-1, -1)
+                bestCBI = -1
+
+                for cell in empties:
+                    x = cell[0]
+                    y = cell[1]
+                    self.board[x][y] = self.minPlayer
+                    newCBI = self.newCurrBoardIdx(cell, self.globalIdx[currBoardIdx])
+                    score = self.alphabetaYourAgent(1, newCBI, -inf, inf, False)
+                    self.board[x][y] = '_'
+                    if score > bestVal:
+                        bestVal = score
+                        bestOp = cell
+                        bestCBI = newCBI
+
+                self.board[bestOp[0]][bestOp[1]] = self.minPlayer
+                currBoardIdx = bestCBI
+                bestMove.append(bestOp)
+                gameBoards.append(copy.deepcopy(self.board))
+            else:
+                empties = self.emptyCells(self.globalIdx[currBoardIdx])
+                if len(empties) == 0:
+                    winner = 0
+                    break
+                bestVal = -inf
+                bestOp = (-1, -1)
+                bestCBI = -1
+
+                for cell in empties:
+                    x = cell[0]
+                    y = cell[1]
+                    self.board[x][y] = self.maxPlayer
+                    newCBI = self.newCurrBoardIdx(cell, self.globalIdx[currBoardIdx])
+                    score = self.alphabeta(1, newCBI, -inf, inf, True)
+                    self.board[x][y] = '_'
+                    if score > bestVal:
+                        bestVal = score
+                        bestOp = cell
+                        bestCBI = newCBI
+
+                self.board[bestOp[0]][bestOp[1]] = self.maxPlayer
+                bestMove.append(bestOp)
+                gameBoards.append(copy.deepcopy(self.board))
+                currBoardIdx = bestCBI
+            self.printGameBoard()
+            agentTurn = not agentTurn
+            res = self.checkWinner()
+            if res == 1:
+                winner = 1
+                break
+            if res == -1:
+                winner = -1
+                break
+
         return gameBoards, bestMove, winner
 
 
@@ -648,14 +793,74 @@ class ultimateTicTacToe:
         bestMove=[]
         gameBoards=[]
         winner=0
+
+        currBoardIdx = self.startBoardIdx
+        agentTurn = True
+        while True:
+            if agentTurn:
+                empties = self.emptyCells(self.globalIdx[currBoardIdx])
+                if len(empties) == 0:
+                    winner = 0
+                    break
+                bestVal = -inf
+                bestOp = (-1, -1)
+                bestCBI = -1
+
+                for cell in empties:
+                    x = cell[0]
+                    y = cell[1]
+                    self.board[x][y] = self.minPlayer
+                    newCBI = self.newCurrBoardIdx(cell, self.globalIdx[currBoardIdx])
+                    score = self.alphabetaYourAgent(1, newCBI, -inf, inf, False)
+                    self.board[x][y] = '_'
+                    if score > bestVal:
+                        bestVal = score
+                        bestOp = cell
+                        bestCBI = newCBI
+
+                self.board[bestOp[0]][bestOp[1]] = self.minPlayer
+                currBoardIdx = bestCBI
+                bestMove.append(bestOp)
+                gameBoards.append(copy.deepcopy(self.board))
+            else:
+                choice = int(input("Enter a number 1 through 9: "))
+                choice -= 1
+                row = int(choice / 3)
+                col = int(choice % 3)
+                row += self.globalIdx[currBoardIdx][0]
+                col += self.globalIdx[currBoardIdx][1]
+                self.board[row][col] = self.maxPlayer
+                currBoardIdx = self.newCurrBoardIdx((row, col), self.globalIdx[currBoardIdx])
+                bestMove.append((row, col))
+                gameBoards.append(copy.deepcopy(self.board))
+            self.printGameBoard()
+            agentTurn = not agentTurn
+            res = self.checkWinner()
+            if res == 1:
+                winner = 1
+                break
+            if res == -1:
+                winner = -1
+                break
+
         return gameBoards, bestMove, winner
 
 if __name__=="__main__":
     uttt=ultimateTicTacToe()
-    gameBoards, bestMove, expandedNodes, bestValue, winner=uttt.playGamePredifinedAgent(True,False,False)
+    gameBoards, bestMove, winner=uttt.playGameHuman()
     if winner == 1:
-        print("The winner is maxPlayer!!!")
+        print("The winner is you!!!!")
     elif winner == -1:
-        print("The winner is minPlayer!!!")
+        print("The winner is your agent!!!")
     else:
         print("Tie. No winner:(")
+    # uttt=ultimateTicTacToe()
+    # gameBoards, bestMove, expandedNodes, bestValue, winner=uttt.playGamePredifinedAgent(True,False,False)
+    # if winner == 1:
+    #     print("The winner is maxPlayer!!!")
+    # elif winner == -1:
+    #     print("The winner is minPlayer!!!")
+    # else:
+    #     print("Tie. No winner:(")
+
+    
