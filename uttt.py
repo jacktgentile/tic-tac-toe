@@ -208,7 +208,6 @@ class ultimateTicTacToe:
         """
         #YOUR CODE HERE
         score = 0.0
-        self.expandedNodes += 1
 
         if isMax:
             # rule1
@@ -539,7 +538,7 @@ class ultimateTicTacToe:
         """
         #YOUR CODE HERE
         score=0.0
-
+        self.expandedNodes += 1
         if depth >= self.maxDepth:
                 return self.evaluatePredifined(isMax)
 
@@ -594,7 +593,7 @@ class ultimateTicTacToe:
         """
         #YOUR CODE HERE
         bestValue=0.0
-        
+        self.expandedNodes += 1
 
         if isMax:
             bestValue = -inf
@@ -689,8 +688,6 @@ class ultimateTicTacToe:
                     self.expandedNodes = 0
                     gameBoards.append(copy.deepcopy(self.board))
                 isMax = not isMax
-                self.printGameBoard()
-                print("~~~~~~~~~~~~~~~~\n")
                 res = self.checkWinner()
                 if res != 0:
                     winner = res
@@ -720,8 +717,6 @@ class ultimateTicTacToe:
                 self.expandedNodes = 0
                 gameBoards.append(copy.deepcopy(self.board))
                 isMax = not isMax
-                self.printGameBoard()
-                print("~~~~~~~~~~~~~~~~\n")
                 res = self.checkWinner()
                 if res != 0:
                     winner = res
@@ -750,8 +745,6 @@ class ultimateTicTacToe:
                 self.expandedNodes = 0
                 gameBoards.append(copy.deepcopy(self.board))
                 isMax = not isMax
-                self.printGameBoard()
-                print("~~~~~~~~~~~~~~~~\n")
                 res = self.checkWinner()
                 if res != 0:
                     winner = res
@@ -780,8 +773,6 @@ class ultimateTicTacToe:
                 self.expandedNodes = 0
                 gameBoards.append(copy.deepcopy(self.board))
                 isMax = not isMax
-                self.printGameBoard()
-                print("~~~~~~~~~~~~~~~~\n")
                 res = self.checkWinner()
                 if res != 0:
                     winner = res
@@ -858,7 +849,6 @@ class ultimateTicTacToe:
                 self.board[bestOp[0]][bestOp[1]] = self.maxPlayer
                 bestMove.append(bestOp)
                 gameBoards.append(copy.deepcopy(self.board))
-                currBoardIdx = bestCBI
             self.printGameBoard()
             agentTurn = not agentTurn
             res = self.checkWinner()
@@ -924,7 +914,6 @@ class ultimateTicTacToe:
                 currBoardIdx = self.newCurrBoardIdx((row, col), self.globalIdx[currBoardIdx])
                 bestMove.append((row, col))
                 gameBoards.append(copy.deepcopy(self.board))
-            self.printGameBoard()
             agentTurn = not agentTurn
             res = self.checkWinner()
             if res == 1:
@@ -949,7 +938,7 @@ if __name__=="__main__":
     #     print("Tie. No winner:(")
 
 
-    gameBoards, bestMove, expandedNodes, bestValue, winner=uttt.playGamePredifinedAgent(True,True,False)
+    gameBoards, bestMove, expandedNodes, bestValue, winner=uttt.playGamePredifinedAgent(True,True,True)
     print(expandedNodes)
     print(bestMove)
     print(bestValue)
