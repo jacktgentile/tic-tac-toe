@@ -208,6 +208,6 @@ if __name__ == "__main__":
 
 
     board = instances.board_6x10
-    pents = instances.petnominos
+    pents = instances.triominos
     app = Application(40)
     app.execute(board, pents)
