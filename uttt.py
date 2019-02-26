@@ -35,8 +35,8 @@ class ultimateTicTacToe:
         self.globalIdx=[(0,0),(0,3),(0,6),(3,0),(3,3),(3,6),(6,0),(6,3),(6,6)]
 
         #Start local board index for reflex agent playing
-        # self.startBoardIdx=4
-        self.startBoardIdx=randint(0,8)
+        self.startBoardIdx=4
+        # self.startBoardIdx=randint(0,8)
 
         #utility value for reflex offensive and reflex defensive agents
         self.winnerMaxUtility=10000
@@ -276,7 +276,6 @@ class ultimateTicTacToe:
         score(float): estimated utility score for maxPlayer or minPlayer
         """
         #YOUR CODE HERE
-        score = 0.0
         return self.evaluatePredifined(isMax) + self.evaluatePredifined(not isMax)
 
 
@@ -398,6 +397,7 @@ class ultimateTicTacToe:
 
     def alphabetaYourAgent(self,depth,currBoardIdx,alpha,beta,isMax):
         score=0.0
+        self.expandedNodes += 1
 
         if depth >= self.maxDepth:
             return self.evaluateDesigned(isMax)
@@ -712,8 +712,9 @@ class ultimateTicTacToe:
         # assuming predefined offensive = is maxPlayer ('X')
         bestMove=[]
         gameBoards=[]
+        expandedNodes=[]
         winner=0
-
+        self.startBoardIdx=randint(0,8)
         currBoardIdx = self.startBoardIdx
         agentTurn = bool(random.getrandbits(1))
         while True:
@@ -731,10 +732,8 @@ class ultimateTicTacToe:
                 self.board[self.max_node[0]][self.max_node[1]] = self.maxPlayer # do move
                 gameBoards.append(copy.deepcopy(self.board))
                 bestMove.append(self.max_node)
-
-
-            self.printGameBoard()
-            print("~~~~~~~~~~~~~~~~~~~~\n")
+            expandedNodes.append(self.expandedNodes)
+            self.expandedNodes = 0
             agentTurn = not agentTurn
             res = self.checkWinner()
             if res == 1:
@@ -758,47 +757,41 @@ class ultimateTicTacToe:
         #YOUR CODE HERE
         bestMove=[]
         gameBoards=[]
+        expandedNodes=[]
         winner=0
 
         currBoardIdx = self.startBoardIdx
         agentTurn = True
         while True:
+            empties = self.emptyCells(self.globalIdx[currBoardIdx])
+            if len(empties) == 0:
+                winner = 0
+                break
             if agentTurn:
-                empties = self.emptyCells(self.globalIdx[currBoardIdx])
-                if len(empties) == 0:
-                    winner = 0
-                    break
-                bestVal = -inf
-                bestOp = (-1, -1)
-                bestCBI = -1
-
-                for cell in empties:
-                    x = cell[0]
-                    y = cell[1]
-                    self.board[x][y] = self.minPlayer
-                    newCBI = self.newCurrBoardIdx(cell, self.globalIdx[currBoardIdx])
-                    score = self.alphabetaYourAgent(1, newCBI, -inf, inf, False)
-                    self.board[x][y] = '_'
-                    if score > bestVal:
-                        bestVal = score
-                        bestOp = cell
-                        bestCBI = newCBI
-
-                self.board[bestOp[0]][bestOp[1]] = self.minPlayer
-                currBoardIdx = bestCBI
-                bestMove.append(bestOp)
+                score = self.alphabetaYourAgent(1, currBoardIdx, -inf, inf, False)
+                
+                currBoardIdx = self.newCurrBoardIdx(self.min_node, self.globalIdx[currBoardIdx])
+                self.board[self.min_node[0]][self.min_node[1]] = self.minPlayer # do move
                 gameBoards.append(copy.deepcopy(self.board))
+                bestMove.append(self.min_node)
+
             else:
+                print("You are board", currBoardIdx + 1)
                 choice = int(input("Enter a number 1 through 9: "))
                 choice -= 1
                 row = int(choice / 3)
                 col = int(choice % 3)
                 row += self.globalIdx[currBoardIdx][0]
                 col += self.globalIdx[currBoardIdx][1]
+                if self.board[row][col]  != '_':
+                    print("Try again")
+                    continue
                 self.board[row][col] = self.maxPlayer
                 currBoardIdx = self.newCurrBoardIdx((row, col), self.globalIdx[currBoardIdx])
                 bestMove.append((row, col))
                 gameBoards.append(copy.deepcopy(self.board))
+            self.printGameBoard()
+            print("~~~~~~~~~~~~~~~~~~~~~~\n") 
             agentTurn = not agentTurn
             res = self.checkWinner()
             if res == 1:
@@ -807,30 +800,33 @@ class ultimateTicTacToe:
             if res == -1:
                 winner = -1
                 break
+        # print(expandedNodes)
 
         return gameBoards, bestMove, winner
 
 if __name__=="__main__":
     uttt=ultimateTicTacToe()
-    gameBoards, bestMove, winner=uttt.playGameYourAgent()
+    # gameBoards, bestMove, winner=uttt.playGameHuman()
+    # uttt.printGameBoard()
+    # print(bestMove)
+    # if winner == 1:
+    #     print("The winner is you!!!")
+    # elif winner == -1:
+    #     print("The winner is your agent!!!")
+    # else:
+    #     print("Tie. No winner:(")
+
+
+    gameBoards, bestMove, expandedNodes, bestValue, winner=uttt.playGamePredifinedAgent(True,False,False)
+    
+    print(expandedNodes)
     print(bestMove)
+    print(bestValue)
     if winner == 1:
         print("The winner is maxPlayer!!!")
     elif winner == -1:
-        print("The winner is your agent!!!")
+        print("The winner is minPlayer!!!")
     else:
         print("Tie. No winner:(")
-
-
-    # gameBoards, bestMove, expandedNodes, bestValue, winner=uttt.playGamePredifinedAgent(True,True,True)
-    # print(expandedNodes)
-    # print(bestMove)
-    # print(bestValue)
-    # if winner == 1:
-    #     print("The winner is maxPlayer!!!")
-    # elif winner == -1:
-    #     print("The winner is minPlayer!!!")
-    # else:
-    #     print("Tie. No winner:(")
 
     
